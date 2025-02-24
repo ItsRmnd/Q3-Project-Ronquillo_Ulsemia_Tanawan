@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Game</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .word { font-size: 24px; letter-spacing: 10px; margin: 20px; }
+        .keyboard { display: inline-block; margin-top: 20px; }
+        .row { display: flex; justify-content: center; }
+        .row button { margin: 5px; padding: 10px; font-size: 16px; width: 40px; }
+        .hangman { font-size: 20px; color: red; }
+        canvas { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Hangman Game</h1>
+    <div id="word" class="word"></div>
+    <div id="hangman" class="hangman">Attempts Left: 6</div>
+    <canvas id="hangmanCanvas" width="200" height="200"></canvas>
+    <div class="keyboard"></div>
+    <script>
+        const words = ["apple", "beach", "chair", "delta", "eagle", "flame", "grape", "hotel", "ivory", "jolly", "kites", "lemon", "mango", "night", "ocean", "pearl", "queen", "racer", "sugar", "tiger", "umbra", "vivid", "waste", "xerox", "yield", "zebra"];
+
+        const selectedWord = words[Math.floor(Math.random() * words.length)];
+        let displayWord = "_".repeat(selectedWord.length).split("");
+        let attempts = 6;
+
+        document.getElementById("word").innerText = displayWord.join(" ");
+
+        function createKeyboard() {
+            const keyboard = document.querySelector(".keyboard");
+            const layout = [
+                "qwertyuiop",
+                "asdfghjkl",
+                "zxcvbnm"
+            ];
+
+            layout.forEach(row => {
+                let rowDiv = document.createElement("div");
+                rowDiv.classList.add("row");
+                row.split("").forEach(letter => {
+                    let btn = document.createElement("button");
+                    btn.innerText = letter;
+                    btn.onclick = () => guessLetter(letter, btn);
+                    rowDiv.appendChild(btn);
+                });
+                keyboard.appendChild(rowDiv);
+            });
+        }
+
+        function guessLetter(letter, button) {
+            button.disabled = true;
+            let found = false;
+            
+            for (let i = 0; i < selectedWord.length; i++) {
+                if (selectedWord[i] === letter) {
+                    displayWord[i] = letter;
+                    found = true;
+                }
+            }
+            
+            document.getElementById("word").innerText = displayWord.join(" ");
+
+            if (!found) {
+                attempts--;
+                document.getElementById("hangman").innerText = "Attempts Left: " + attempts;
+                drawHangman(attempts);
+                if (attempts === 0) alert("Game Over! The word was " + selectedWord);
+            } else if (!displayWord.includes("_")) {
+                alert("Congratulations! You guessed the word: " + selectedWord);
+            }
+        }
+
+        function drawHangman(attempts) {
+            const canvas = document.getElementById("hangmanCanvas");
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (attempts <= 5) { ctx.beginPath(); ctx.moveTo(10, 190); ctx.lineTo(190, 190); ctx.stroke(); }
+            if (attempts <= 4) { ctx.beginPath(); ctx.moveTo(50, 190); ctx.lineTo(50, 10); ctx.lineTo(150, 10); ctx.lineTo(150, 30); ctx.stroke(); }
+            if (attempts <= 3) { ctx.beginPath(); ctx.arc(150, 50, 20, 0, Math.PI * 2); ctx.stroke(); }
+            if (attempts <= 2) { ctx.beginPath(); ctx.moveTo(150, 70); ctx.lineTo(150, 130); ctx.stroke(); }
+            if (attempts <= 1) { ctx.beginPath(); ctx.moveTo(150, 90); ctx.lineTo(120, 110); ctx.moveTo(150, 90); ctx.lineTo(180, 110); ctx.stroke(); }
+            if (attempts === 0) { ctx.beginPath(); ctx.moveTo(150, 130); ctx.lineTo(120, 160); ctx.moveTo(150, 130); ctx.lineTo(180, 160); ctx.stroke(); }
+        }
+
+        createKeyboard();
+    </script>
+</body>
+</html>
